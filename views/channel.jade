@@ -1,0 +1,13 @@
+!!! 5
+html(lang="en")
+  head
+    title channel
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
+    script(src='/js/app.js')
+    link(rel='stylesheet',type='text/css',href='/css/app.css')
+    script(type='text/javascript')
+      onload = function() {
+        new Channel(document.getElementById('console')).connect();
+      };
+  body
+    div(id='console',data-channel-id=id)
