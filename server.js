@@ -4,7 +4,7 @@ var
     wss             = module.exports.wss = new WebSocketServer({port: 8080}),
     express         = require('express'),
     app             = module.exports.app = express.createServer(),
-    md5             = require('MD5');
+    md5             = require('md5');
 
 app.set('view engine', 'jade');
 app.set('view options', { layout: false });
