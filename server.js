@@ -1,10 +1,10 @@
 var
-    port = process.env.PORT || 3000,
+    port            = process.env.PORT || 3000,
     WebSocketServer = require('ws').Server,
-    wss = new WebSocketServer({port: 8080}),
-    express = require('express'),
-    app = express.createServer(),
-    md5 = require('MD5');
+    wss             = module.exports.wss = new WebSocketServer({port: 8080}),
+    express         = require('express'),
+    app             = module.exports.app = express.createServer(),
+    md5             = require('MD5');
 
 app.set('view engine', 'jade');
 app.set('view options', { layout: false });
@@ -21,7 +21,9 @@ app.get('/channels/:id', function(req, res){
   res.render('channel', { id: id });
 });
 
-app.listen(port);
+if(!module.parent) {
+  app.listen(port);
+}
 
 function makeChannel(wss, path) {
   wss.on('connection/' + path, function(ws) {
