@@ -16,7 +16,6 @@ def main
   puts channel_url
   Launchy.open(channel_url)
 
-
   client = WebSocket.new(WS_URL + id)
   open('/dev/stdin') do |f|
     f.each do |line|
