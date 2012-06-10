@@ -8,7 +8,7 @@ var mocha     = require('mocha'),
     port      = 3001;
 
 _.extend(Function.prototype, {
-  makeRequestSpec: function(method, path, options) {
+  toRequestSpec: function(method, path, options) {
     var self = this;
     return function(done) {
       request(
@@ -43,7 +43,7 @@ describe('API', function() {
       res.body.should.match(/data-channel-id="xxx"/);
 
       done();
-    }.makeRequestSpec(method, path));
+    }.toRequestSpec(method, path));
   });
 
   describe('POST /channels', function() {
@@ -51,12 +51,13 @@ describe('API', function() {
         path   = '/channels';
 
     it('should create channel', function(req, res, done) {
-      var data = JSON.parse(res.body);
+      var data = JSON.parse(res.body),
+          ws, ws2, ws3;
 
       should.exist(data.id);
       data.id.should.match(/^[0-9a-f]{32}$/);
 
-      var ws = new WebSocket('http://localhost:8080/' + data.id);
+      ws = new WebSocket('http://localhost:8080/' + data.id);
       ws.on('open', function() {
         wss.clients.length.should.eql(1);
         should.exist(wss.clients[0].path);
@@ -65,15 +66,19 @@ describe('API', function() {
         ws.on('message', function(data, flags) {
           data.should.eql('xxx');
 
+          ws.close();
+          ws2.close();
+          ws3.close();
+
           done();
         });
         
-        var ws2 = new WebSocket('http://localhost:8080/xxx');
+        ws2 = new WebSocket('http://localhost:8080/xxx');
         ws2.on('open', function() {
           wss.clients.length.should.eql(2);
           should.not.exist(wss.clients[1].path);
 
-          var ws3 = new WebSocket('http://localhost:8080/' + data.id);
+          ws3 = new WebSocket('http://localhost:8080/' + data.id);
           ws3.on('open', function() {
             wss.clients.length.should.eql(3);
             should.exist(wss.clients[2].path);
@@ -83,6 +88,6 @@ describe('API', function() {
           });
         });
       });
-    }.makeRequestSpec(method, path));
+    }.toRequestSpec(method, path));
   });
 });
