@@ -17,6 +17,7 @@ p {
     -webkit-transition: background 0.3s;
     -ms-transition: background 0.3s;
     -o-transition: background 0.3s;
+    transition: background 0.3s;
 }
 
 p.ellipsis {
