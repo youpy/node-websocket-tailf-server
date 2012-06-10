@@ -19,26 +19,14 @@ $(function() {
     }, 100);
   };
   
-  var Channel = function(id) {
-    this.id = id;
-  };
-
-  Channel.prototype.connect = function(callback) {
-    var ws = new WebSocket("ws://localhost:8080/" + this.id),
-        self = this;
-
-    ws.onmessage = function (evt) {
-      callback.call(self, evt);
-    };
-  };
-
   var id = $('body').data('channel-id'),
       title = document.title,
       console = new Console($('#console')),
-      count = 0;
+      count = 0,
+      ws = new WebSocket("ws://localhost:8080/" + id);
 
-  new Channel(id).connect(function(evt) {
+  ws.onmessage = function(evt) {
     console.add(evt.data);
     document.title = '(' + (++ count) + ') ' + title;
-  });
+  };
 });
