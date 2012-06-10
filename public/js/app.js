@@ -12,6 +12,7 @@ $(function() {
 
     p.text(text);
     this.e.prepend(p);
+    this.e.trigger('add', [p]);
 
     setTimeout(function() {
       p.removeClass('prepended');
