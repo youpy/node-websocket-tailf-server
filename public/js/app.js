@@ -1,34 +1,43 @@
-(function(g) {
-  var Channel = function(e) {
-    this.e = $(e);
-    this.id = this.e.data('channel-id');
-    this.title = document.title;
-    this.count = 0;
+$(function() {
+  var Console = function(e) {
+    this.e = e;
 
-    this.e.on('click', 'p', function(evt) {
+    e.on('click', 'p', function(evt) {
       $(this).toggleClass('ellipsis');
     });
   };
+
+  Console.prototype.add = function(text) {
+    var p = $('<p class="prepended ellipsis" />');
+
+    p.text(text);
+    this.e.prepend(p);
+
+    setTimeout(function() {
+      p.removeClass('prepended');
+    }, 100);
+  };
   
-  Channel.prototype.connect = function() {
+  var Channel = function(id) {
+    this.id = id;
+  };
+
+  Channel.prototype.connect = function(callback) {
     var ws = new WebSocket("ws://localhost:8080/" + this.id),
-        e = this.e,
-        count = this.count,
-        title = this.title;
+        self = this;
 
     ws.onmessage = function (evt) {
-      var p = $('<p class="prepended ellipsis" />');
-
-      p.text(evt.data);
-      e.prepend(p);
-
-      setTimeout(function() {
-        p.removeClass('prepended');
-      }, 100);
-      
-      document.title = '(' + (++ count) + ') ' + title;
+      callback.call(self, evt);
     };
   };
 
-  g.Channel = Channel;
-})(window);
+  var id = $('body').data('channel-id'),
+      title = document.title,
+      console = new Console($('#console')),
+      count = 0;
+
+  new Channel(id).connect(function(evt) {
+    console.add(evt.data);
+    document.title = '(' + (++ count) + ') ' + title;
+  });
+});
