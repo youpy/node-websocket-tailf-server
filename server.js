@@ -10,13 +10,13 @@ app.set('view engine', 'jade');
 app.set('view options', { layout: false });
 app.use(express.static(__dirname + '/public'));
 
-app.post('/channels', function(req, res){
+app.post('/channels', function(req, res) {
   var id = md5.digest_s((+ new Date()).toString());
   makeChannel(wss, id);
   res.json({ id: id });
 });
 
-app.get('/channels/:id', function(req, res){
+app.get('/channels/:id', function(req, res) {
   var id = req.params.id;
   res.render('channel', { id: id });
 });
