@@ -1,93 +1,68 @@
 var mocha     = require('mocha'),
     should    = require('should'),
-    _         = require('underscore'),
-    app       = require('../server').app,
     wss       = require('../server').wss,
-    request   = require('request'),
     WebSocket = require('ws'),
-    port      = 3001;
+    async     = require('async');
 
-_.extend(Function.prototype, {
-  toRequestSpec: function(method, path, options) {
-    var self = this;
-    return function(done) {
-      request(
-        _.extend({
-          method: method,
-          url: 'http://localhost:' + port + path
-        }, options || {}),
-        function(req, res) {
-          self.call(null, req, res, done);
-        }
-      );
-    };
-  }
-});
+describe('WebSocket', function() {
+  it('should create channel', function(done) {
+    var id,
+        ws, ws1, ws2, ws3;
 
-describe('API', function() {
-  before(function() {
-    app.listen(port);
-  });
+    async.series([
+      function(callback) {
+        ws = new WebSocket('http://localhost:8080/channels');
+        ws.on('open', function() {
+          ws.on('message', function(data, flags) {
+            data.should.match(/^[0-9a-f]{32}$/);
+            
+            id = data;
 
-  after(function() {
-    app.close();
-  });
-
-  describe('GET /channels', function() {
-    var method = 'get',
-        path   = '/channels/xxx';
-
-    it('should respond', function(req, res, done) {
-      res.statusCode.should.eql(200);
-      res.body.should.match(/^<!DOCTYPE html><html/);
-      res.body.should.match(/data-channel-id="xxx"/);
-
-      done();
-    }.toRequestSpec(method, path));
-  });
-
-  describe('POST /channels', function() {
-    var method = 'post',
-        path   = '/channels';
-
-    it('should create channel', function(req, res, done) {
-      var data = JSON.parse(res.body),
-          ws, ws2, ws3;
-
-      should.exist(data.id);
-      data.id.should.match(/^[0-9a-f]{32}$/);
-
-      ws = new WebSocket('http://localhost:8080/' + data.id);
-      ws.on('open', function() {
-        wss.clients.length.should.eql(1);
-        should.exist(wss.clients[0].path);
-        wss.clients[0].path.should.eql(data.id);
-
-        ws.on('message', function(data, flags) {
-          data.should.eql('xxx');
-
-          ws.close();
-          ws2.close();
-          ws3.close();
-
-          done();
+            callback();
+          });
         });
-        
-        ws2 = new WebSocket('http://localhost:8080/xxx');
+      },
+      function(callback) {
+        ws1 = new WebSocket('http://localhost:8080/channels/' + id);
+        ws1.on('open', function() {
+          wss.clients.length.should.eql(1);
+          should.exist(wss.clients[0].path);
+          wss.clients[0].path.should.eql(id);
+
+          ws1.on('message', function(data, flags) {
+            data.should.eql('xxx');
+
+            ws1.close();
+            ws2.close();
+            ws3.close();
+
+            done();
+          });
+
+          callback();
+        });
+      },
+      function(callback) {
+        ws2 = new WebSocket('http://localhost:8080/channels/bar');
         ws2.on('open', function() {
           wss.clients.length.should.eql(2);
           should.not.exist(wss.clients[1].path);
 
-          ws3 = new WebSocket('http://localhost:8080/' + data.id);
-          ws3.on('open', function() {
-            wss.clients.length.should.eql(3);
-            should.exist(wss.clients[2].path);
-            wss.clients[2].path.should.eql(data.id);
-
-            ws3.send('xxx');
-          });
+          callback();
         });
-      });
-    }.toRequestSpec(method, path));
+      },
+      function(callback) {
+        ws3 = new WebSocket('http://localhost:8080/channels/' + id);
+        ws3.on('open', function() {
+          wss.clients.length.should.eql(3);
+          wss.clients[2].path.should.eql(id);
+          should.exist(wss.clients[2].path);
+
+          ws3.send('xxx');
+
+          callback();
+        });
+      }
+    ]);
   });
 });
