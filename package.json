@@ -4,7 +4,7 @@
   "dependencies": {
     "express": "2.5.9",
     "jade": "0.26.1",
-    "MD5": "1.0.0",
+    "md5": "1.0.0",
     "mocha": "1.1.0",
     "request": "2.9.202",
     "should": "0.6.3",
