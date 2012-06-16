@@ -6,6 +6,7 @@ var
 
 wss.on('connection/channels', function(ws) {
   var id = md5.digest_s((+ new Date()).toString());
+
   makeChannel(wss, id);
   ws.send(id);
   ws.close();
