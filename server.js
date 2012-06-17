@@ -1,5 +1,5 @@
 var
-    port            = process.env.PORT || 8080,
+    port            = process.env.NODE_ENV == 'production' ? 80 : 8080,
     WebSocketServer = require('ws').Server,
     wss             = module.exports.wss = new WebSocketServer({port: port}),
     md5             = require('md5');
