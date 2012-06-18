@@ -1,6 +1,6 @@
 {
-  "name": "streaming-snippet",
-  "version": "0.0.1",
+  "name": "tailf",
+  "version": "0.0.1-1",
   "dependencies": {
     "express": "2.5.9",
     "jade": "0.26.1",
@@ -13,5 +13,9 @@
   },
   "engines": {
     "node": "0.6.x"
+  },
+  "subdomain": "beer",
+  "scripts": {
+    "start": "server.js"
   }
 }
